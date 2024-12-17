@@ -1,0 +1,25 @@
+{
+  "name": "hash-fingerprint",
+  "version": "1.0.6",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "fingerprint",
+    "hashing",
+    "browser-fingerprint",
+    "user-agent",
+    "os-info",
+    "nodejs",
+    "security",
+    "npm-package"
+  ],
+  "author": "",
+  "license": "ISC",
+  "description": "A library to generate browser and OS-based fingerprints using hashing",
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
