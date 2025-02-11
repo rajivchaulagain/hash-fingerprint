@@ -1,5 +1,6 @@
+import { FingerprintOptions } from "./types";
 
-export const sortObjectKeys = (obj: any): any => {
+const sortObjectKeys = (obj: any): any => {
     try {
         if (typeof obj !== 'object' || obj === null) return obj;
         if (Array.isArray(obj)) return obj.map(sortObjectKeys);
@@ -13,7 +14,7 @@ export const sortObjectKeys = (obj: any): any => {
     }
 };
 
-export const getScreenInfo = (): Record<string, number> | null => {
+const getScreenInfo = (): Record<string, number> | null => {
     try {
         return typeof screen !== 'undefined' ? {
             width: screen.width,
@@ -28,7 +29,7 @@ export const getScreenInfo = (): Record<string, number> | null => {
     }
 };
 
-export const getNavigatorInfo = (): Record<string, any> | null => {
+const getNavigatorInfo = (): Record<string, any> | null => {
     try {
         if (typeof navigator === 'undefined') return null;
         return {
@@ -45,7 +46,7 @@ export const getNavigatorInfo = (): Record<string, any> | null => {
     }
 };
 
-export const getTimeZone = (): string => {
+const getTimeZone = (): string => {
     try {
         return Intl.DateTimeFormat().resolvedOptions().timeZone;
     } catch (error) {
@@ -54,7 +55,7 @@ export const getTimeZone = (): string => {
     }
 };
 
-export const getCanvasFingerprint = (): string | null => {
+const getCanvasFingerprint = (): string | null => {
     try {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -73,7 +74,7 @@ export const getCanvasFingerprint = (): string | null => {
     }
 };
 
-export const getWebGLInfo = (): Record<string, string> | null => {
+const getWebGLInfo = (): Record<string, string> | null => {
     try {
         const canvas = document.createElement('canvas');
         const gl = canvas.getContext('webgl') as WebGLRenderingContext | null 
@@ -91,7 +92,7 @@ export const getWebGLInfo = (): Record<string, string> | null => {
     }
 };
 
-export const detectOS = (): string => {
+const detectOS = (): string => {
     try {
         const ua = navigator.userAgent;
         if (/windows phone/i.test(ua)) return 'Windows Phone';
@@ -104,5 +105,46 @@ export const detectOS = (): string => {
     } catch (error) {
         console.warn('Error detecting OS:', error);
         return 'Unknown OS';
+    }
+};
+
+
+export const generateFingerprint = async (options: FingerprintOptions = {}): Promise<string> => {
+    try {
+        const components: Record<string, any> = {};
+        const {
+            useBrowserInfo = true,
+            useOSInfo = true,
+            useCanvas = true,
+            useWebGL = true,
+            usePlugins = true,
+            customData = {}
+        } = options;
+
+        if (useBrowserInfo) {
+            components.screen = getScreenInfo();
+            components.navigator = getNavigatorInfo();
+            components.timeZone = getTimeZone();
+
+            if (useCanvas) components.canvas = getCanvasFingerprint();
+            if (useWebGL) components.webGL = getWebGLInfo();
+            if (usePlugins) components.plugins = getNavigatorInfo()?.plugins || null;
+        }
+
+        if (useOSInfo) components.os = detectOS();
+        if (Object.keys(customData).length > 0) components.customData = customData;
+
+        const sortedData = sortObjectKeys(components);
+        const dataString = JSON.stringify(sortedData);
+
+        // Hash using SHA-256
+        const encoder = new TextEncoder();
+        const dataBuffer = encoder.encode(dataString);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (error) {
+        console.error('Error generating fingerprint:', error);
+        return 'ErrorGeneratingFingerprint';
     }
 };
