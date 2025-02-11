@@ -10,7 +10,18 @@ interface FingerprintOptions {
 // Function to collect browser information
 const getBrowserInfo = (): string => {
     if (typeof window !== "undefined" && typeof navigator !== "undefined") {
-        return `${navigator.userAgent} ${navigator.language}`;
+        const userAgent = navigator.userAgent || "UserAgent Unavailable";
+        const language = navigator.language || "Language Unavailable";
+        const screenInfo =
+            window.screen
+                ? `${window.screen.width}x${window.screen.height} ColorDepth: ${window.screen.colorDepth}`
+                : "Screen Info Unavailable";
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Timezone Unavailable";
+        const cores = navigator.hardwareConcurrency || "CPU Cores Unavailable";
+        const deviceMemory = (navigator as any).deviceMemory || "Memory Unavailable";
+        const touchSupport = navigator.maxTouchPoints > 0 ? `Touch Points: ${navigator.maxTouchPoints}` : "No Touch Support";
+
+        return `UserAgent: ${userAgent} | Language: ${language} | Screen: ${screenInfo} | Timezone: ${timezone} | CPU Cores: ${cores} | Device Memory: ${deviceMemory} | ${touchSupport}`;
     }
 
     return "Browser info unavailable";

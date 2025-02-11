@@ -1,4 +1,4 @@
-# Hash Fingerprint
+# Unique Fingerprint
 
 A simple library to generate a unique fingerprint based on browser and OS information, and custom data using hashing (SHA-256).
 
@@ -7,13 +7,13 @@ A simple library to generate a unique fingerprint based on browser and OS inform
 To install the package, run:
 
 ```bash
-npm install hash-fingerprint
+npm install unique-fingerprintjs
 
 ## Usage
 
 Import the library
 
-import { generateFingerprint } from 'hash-fingerprint';
+import { generateFingerprint } from 'unique-fingerprintjs';
 
 // Basic usage with browser and OS info
 const fingerprint1 = generateFingerprint();

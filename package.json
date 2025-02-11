@@ -1,11 +1,16 @@
 {
-  "name": "hash-fingerprint",
-  "version": "1.0.6",
+  "name": "unique-fingerprintjs",
+  "version": "2.0.1",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rajivchaulagain/hash-fingerprint"
+  },
   "keywords": [
+    "unique-fingerprintjs",
     "fingerprint",
     "hashing",
     "browser-fingerprint",
