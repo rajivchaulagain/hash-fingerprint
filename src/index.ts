@@ -1,72 +1,42 @@
-import * as os from "os";
-import { createHash } from "crypto";
+import { FingerprintOptions } from "./types";
+import { detectOS, getCanvasFingerprint, getNavigatorInfo, getScreenInfo, getTimeZone, getWebGLInfo, sortObjectKeys } from "./utils";
 
-interface FingerprintOptions {
-    useBrowserInfo?: boolean; // Whether to include browser info
-    useOSInfo?: boolean;      // Whether to include OS info
-    customData?: Record<string, any>; // Additional custom data
-}
-
-// Function to collect browser information
-const getBrowserInfo = (): string => {
-    if (typeof window !== "undefined" && typeof navigator !== "undefined") {
-        const userAgent = navigator.userAgent || "UserAgent Unavailable";
-        const language = navigator.language || "Language Unavailable";
-        const screenInfo =
-            window.screen
-                ? `${window.screen.width}x${window.screen.height} ColorDepth: ${window.screen.colorDepth}`
-                : "Screen Info Unavailable";
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Timezone Unavailable";
-        const cores = navigator.hardwareConcurrency || "CPU Cores Unavailable";
-        const deviceMemory = (navigator as any).deviceMemory || "Memory Unavailable";
-        const touchSupport = navigator.maxTouchPoints > 0 ? `Touch Points: ${navigator.maxTouchPoints}` : "No Touch Support";
-
-        return `UserAgent: ${userAgent} | Language: ${language} | Screen: ${screenInfo} | Timezone: ${timezone} | CPU Cores: ${cores} | Device Memory: ${deviceMemory} | ${touchSupport}`;
-    }
-
-    return "Browser info unavailable";
-};
-
-// Function to collect OS information
-const getOSInfo = (): string => {
+export const generateFingerprint = async (options: FingerprintOptions = {}): Promise<string> => {
     try {
-        return `${os.platform()} ${os.release()} ${os.arch()}`;
+        const components: Record<string, any> = {};
+        const {
+            useBrowserInfo = true,
+            useOSInfo = true,
+            useCanvas = true,
+            useWebGL = true,
+            usePlugins = true,
+            customData = {}
+        } = options;
+
+        if (useBrowserInfo) {
+            components.screen = getScreenInfo();
+            components.navigator = getNavigatorInfo();
+            components.timeZone = getTimeZone();
+
+            if (useCanvas) components.canvas = getCanvasFingerprint();
+            if (useWebGL) components.webGL = getWebGLInfo();
+            if (usePlugins) components.plugins = getNavigatorInfo()?.plugins || null;
+        }
+
+        if (useOSInfo) components.os = detectOS();
+        if (Object.keys(customData).length > 0) components.customData = customData;
+
+        const sortedData = sortObjectKeys(components);
+        const dataString = JSON.stringify(sortedData);
+
+        // Hash using SHA-256
+        const encoder = new TextEncoder();
+        const dataBuffer = encoder.encode(dataString);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     } catch (error) {
-        return "OS info unavailable (non-Node.js environment)";
+        console.error('Error generating fingerprint:', error);
+        return 'ErrorGeneratingFingerprint';
     }
 };
-
-// Function to hash data using SHA-256
-const hashData = (data: string): string => {
-    return createHash("sha256").update(data).digest("hex");
-};
-
-// Main fingerprint generation function
-const generateFingerprint = (options: FingerprintOptions = {}): string => {
-    const {
-        useBrowserInfo = true,
-        useOSInfo = true,
-        customData = {},
-    } = options;
-
-    let data = "";
-
-    if (useBrowserInfo) {
-        data += getBrowserInfo();
-    }
-
-    if (useOSInfo) {
-        data += getOSInfo();
-    }
-
-    if (customData) {
-        data += JSON.stringify(customData);
-    }
-
-
-    return hashData(data);
-};
-
-// Export the main function
-export { generateFingerprint, getBrowserInfo, getOSInfo, hashData };
-

@@ -8,30 +8,46 @@ To install the package, run:
 
 ```bash
 npm install unique-fingerprintjs
+```
 
 ## Usage
 
-Import the library
+Import the library:
 
+```typescript
 import { generateFingerprint } from 'unique-fingerprintjs';
+```
 
-// Basic usage with browser and OS info
-const fingerprint1 = generateFingerprint();
+### Basic usage with browser and OS info:
+
+```typescript
+const fingerprint1 = await generateFingerprint();
 console.log(fingerprint1); // Outputs the hashed fingerprint
+```
 
-// Usage with custom data and no OS info
-const fingerprint2 = generateFingerprint({
+### Usage with custom data and no OS info:
+
+```typescript
+const fingerprint2 = await generateFingerprint({
   useOSInfo: false,
   customData: { user_id: '12345', session_id: 'abcde' }
 });
+console.log(fingerprint2);
+```
 
-## options
+## Options
+
+The `generateFingerprint` function accepts an options object:
+
+```typescript
 interface FingerprintOptions {
-    useBrowserInfo?: boolean; // Whether to include browser info
-    useOSInfo?: boolean;      // Whether to include OS info
+    useBrowserInfo?: boolean; // Whether to include browser info. default value is true
+    useOSInfo?: boolean;      // Whether to include OS info. default value is true
+    useCanvas?: boolean;      // Whether to use Canvas fingerprinting. default value is true
+    useWebGL?: boolean;       // Whether to use WebGL fingerprinting. default value is true
+    usePlugins?: boolean;     // Whether to include browser plugins info. default value is true
     customData?: Record<string, any>; // Additional custom data
 }
-
 ```
 
 ## Contributing
@@ -43,4 +59,4 @@ Please make sure to update tests as appropriate.
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)# hash-fingerprint
+[MIT](https://choosealicense.com/licenses/mit/)
